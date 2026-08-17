@@ -21,6 +21,7 @@ import {
   saveSessionToFirestore,
   updateSessionInFirestore,
 } from "./lib/firebase";
+import { analyzeStudentPost } from "./lib/aiAnalysisService";
 import { Navbar } from "./components/Navbar";
 import { StudentView } from "./components/StudentView";
 import { StudentHistory } from "./components/StudentHistory";
@@ -213,22 +214,13 @@ export default function App() {
     const resolvedAuthorNim = data.authorNim?.trim() || currentUser.nim || "232103817978";
 
     try {
-      // Call server API for AI Scaffolding & Bloom Taxonomy analysis
-      const res = await fetch("/api/analyze-post", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionTitle: currentSession.title,
-          postType: data.postType,
-          content: data.content,
-          studentName: resolvedAuthorName,
-        }),
+      // Call AI Scaffolding & Bloom Taxonomy analysis (via serverless API, Gemini, or smart fallback)
+      const aiResult = await analyzeStudentPost({
+        sessionTitle: `${currentSession.courseName} - ${currentSession.title}`,
+        postType: data.postType,
+        content: data.content,
+        studentName: resolvedAuthorName,
       });
-
-      let aiResult: any = null;
-      if (res.ok) {
-        aiResult = await res.json();
-      }
 
       const now = new Date();
       const timeStr = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}, ${String(
@@ -250,20 +242,16 @@ export default function App() {
         parentPostId: data.parentPostId || null as any,
         createdAt: timeStr,
         aiScaffolding: {
-          text:
-            aiResult?.aiResponse ||
-            `Halo ${resolvedAuthorName}! Postingan Anda mengenai "${currentSession.topic}" telah dicatat. Asisten AI telah meninjau tingkat pemahaman kognitif untuk diverifikasi oleh Dosen/Tutor.`,
-          bloomLevel: aiResult?.bloomLevel || "Memahami (C2)",
-          bloomCode: aiResult?.bloomCode || "C2",
-          bloomExplanation:
-            aiResult?.bloomExplanation ||
-            "Postingan mengeksplorasi penjelasan dan keterkaitan konsep materi pembelajaran.",
+          text: aiResult.aiResponse,
+          bloomLevel: aiResult.bloomLevel,
+          bloomCode: aiResult.bloomCode,
+          bloomExplanation: aiResult.bloomExplanation,
           generatedAt: timeStr,
         },
         tutorEvaluation: {
           status: "Menunggu",
-          finalBloomLevel: aiResult?.bloomLevel || "Memahami (C2)",
-          tutorReinforcement: aiResult?.suggestedReinforcement || "",
+          finalBloomLevel: aiResult.bloomLevel,
+          tutorReinforcement: aiResult.suggestedReinforcement || "",
         },
         replies: [],
       };
