@@ -12,7 +12,12 @@ export interface AIAnalysisResult {
  * Direct REST API call to Google Generative Language
  */
 async function callGeminiDirectREST(apiKey: string, prompt: string): Promise<AIAnalysisResult | null> {
-  const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+  const models = [
+    "gemini-3.5-flash-lite",
+    "gemini-3.5-flash",
+    "gemini-3.6-flash",
+    "gemini-3.7-flash"
+  ];
 
   for (const model of models) {
     try {
@@ -238,7 +243,7 @@ Format respons JSON persis:
   if (clientKey) {
     try {
       const directResult = await callGeminiDirectREST(clientKey, prompt);
-      if (directResult) {
+      if (directResult && directResult.aiResponse && directResult.aiResponse.length > 20) {
         return directResult;
       }
     } catch (e) {
@@ -248,7 +253,7 @@ Format respons JSON persis:
     try {
       const ai = new GoogleGenAI({ apiKey: clientKey });
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.5-flash-lite",
         contents: prompt,
         config: {
           responseMimeType: "application/json",

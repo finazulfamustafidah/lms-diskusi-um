@@ -157,7 +157,7 @@ Tugas Anda:
 5. Berikan "suggestedReinforcement": Saran penguatan atau koreksi materi yang dapat digunakan Dosen/Tutor saat memvalidasi jawaban.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.7-flash",
+      model: "gemini-3.5-flash-lite",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
