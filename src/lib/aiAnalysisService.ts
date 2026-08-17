@@ -8,6 +8,20 @@ export interface AIAnalysisResult {
   suggestedReinforcement: string;
 }
 
+function cleanJsonString(rawText: string): any {
+  if (!rawText) return null;
+  let cleaned = rawText.trim();
+  if (cleaned.startsWith("```json")) {
+    cleaned = cleaned.slice(7);
+  } else if (cleaned.startsWith("```")) {
+    cleaned = cleaned.slice(3);
+  }
+  if (cleaned.endsWith("```")) {
+    cleaned = cleaned.slice(0, -3);
+  }
+  return JSON.parse(cleaned.trim());
+}
+
 /**
  * Direct REST API call to Google Generative Language
  */
@@ -35,7 +49,7 @@ async function callGeminiDirectREST(apiKey: string, prompt: string): Promise<AIA
         const data = await res.json();
         const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
         if (rawText) {
-          const parsed = JSON.parse(rawText);
+          const parsed = cleanJsonString(rawText);
           if (parsed && parsed.aiResponse) {
             return parsed;
           }
@@ -260,7 +274,7 @@ Format respons JSON persis:
         },
       });
 
-      const parsed = JSON.parse(response.text || "{}");
+      const parsed = cleanJsonString(response.text || "{}");
       if (parsed && parsed.aiResponse) {
         return parsed;
       }

@@ -1,12 +1,25 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
+
+function cleanJsonString(rawText: string): any {
+  if (!rawText) return null;
+  let cleaned = rawText.trim();
+  if (cleaned.startsWith("```json")) {
+    cleaned = cleaned.slice(7);
+  } else if (cleaned.startsWith("```")) {
+    cleaned = cleaned.slice(3);
+  }
+  if (cleaned.endsWith("```")) {
+    cleaned = cleaned.slice(0, -3);
+  }
+  return JSON.parse(cleaned.trim());
+}
 
 async function callGeminiREST(apiKey: string, prompt: string) {
   const models = [
     "gemini-3.5-flash-lite",
     "gemini-3.5-flash",
     "gemini-3.6-flash",
-    "gemini-3.7-flash",
-    "gemini-flash-latest"
+    "gemini-3.7-flash"
   ];
   let lastError: any = null;
 
@@ -32,7 +45,10 @@ async function callGeminiREST(apiKey: string, prompt: string) {
         const json = await response.json();
         const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
         if (text) {
-          return JSON.parse(text);
+          const parsed = cleanJsonString(text);
+          if (parsed && parsed.aiResponse) {
+            return parsed;
+          }
         }
       } else {
         const errJson = await response.json().catch(() => ({}));
@@ -69,7 +85,16 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const { sessionTitle, postType, content, studentName } = req.body || {};
+    let body = req.body;
+    if (typeof body === "string") {
+      try {
+        body = JSON.parse(body);
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    const { sessionTitle, postType, content, studentName } = body || {};
 
     if (!content || !content.trim()) {
       return res.status(400).json({ error: "Konten postingan tidak boleh kosong" });
@@ -128,8 +153,12 @@ Kembalikan format JSON persis:
       },
     });
 
-    const parsed = JSON.parse(response.text || "{}");
-    return res.status(200).json(parsed);
+    const parsed = cleanJsonString(response.text || "{}");
+    if (parsed && parsed.aiResponse) {
+      return res.status(200).json(parsed);
+    }
+
+    return res.status(500).json({ error: "Failed parsing AI response" });
   } catch (error: any) {
     console.error("Vercel Gemini API error:", error?.message || error);
     return res.status(500).json({ error: error?.message || "Internal AI Error" });

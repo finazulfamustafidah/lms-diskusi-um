@@ -27,6 +27,20 @@ function getAI(): GoogleGenAI | null {
   return aiClient;
 }
 
+function cleanJsonString(rawText: string): any {
+  if (!rawText) return null;
+  let cleaned = rawText.trim();
+  if (cleaned.startsWith("```json")) {
+    cleaned = cleaned.slice(7);
+  } else if (cleaned.startsWith("```")) {
+    cleaned = cleaned.slice(3);
+  }
+  if (cleaned.endsWith("```")) {
+    cleaned = cleaned.slice(0, -3);
+  }
+  return JSON.parse(cleaned.trim());
+}
+
 // Cognitive Bloom level helper for fallback
 function fallbackBloomAnalysis(topic: string, text: string, postType: string, studentName?: string) {
   const lower = text.toLowerCase();
@@ -196,8 +210,17 @@ Tugas Anda:
       },
     });
 
-    const parsed = JSON.parse(response.text || "{}");
-    return res.json(parsed);
+    const parsed = cleanJsonString(response.text || "{}");
+    if (parsed && parsed.aiResponse) {
+      return res.json(parsed);
+    }
+    const fallback = fallbackBloomAnalysis(
+      sessionTitle || "Belajar Pembelajaran",
+      content,
+      postType || "Ajukan Pertanyaan",
+      studentName
+    );
+    return res.json(fallback);
   } catch (error: any) {
     console.error("Gemini API error:", error?.message || error);
     // Provide clean fallback so the student workflow is never interrupted
