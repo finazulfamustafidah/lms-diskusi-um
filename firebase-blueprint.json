@@ -1,0 +1,49 @@
+{
+  "entities": {
+    "DiscussionSession": {
+      "title": "DiscussionSession",
+      "description": "Perkuliahan discussion session",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "courseName": { "type": "string" },
+        "topic": { "type": "string" },
+        "description": { "type": "string" },
+        "isActive": { "type": "boolean" },
+        "startDate": { "type": "string" },
+        "endDate": { "type": "string" },
+        "competencyGoal": { "type": "string" }
+      },
+      "required": ["id", "title", "courseName", "topic", "description", "isActive", "startDate", "endDate"]
+    },
+    "DiscussionPost": {
+      "title": "DiscussionPost",
+      "description": "A student discussion post with AI scaffolding and tutor evaluation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "sessionId": { "type": "string" },
+        "sessionTitle": { "type": "string" },
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "authorEmail": { "type": "string" },
+        "authorNim": { "type": "string" },
+        "postType": { "type": "string" },
+        "content": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "sessionId", "sessionTitle", "authorName", "postType", "content", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/sessions/{sessionId}": {
+      "schema": "DiscussionSession",
+      "description": "Sessions collection for lecture discussion topics"
+    },
+    "/posts/{postId}": {
+      "schema": "DiscussionPost",
+      "description": "Class discussion posts collection"
+    }
+  }
+}

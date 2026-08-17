@@ -1,0 +1,6 @@
+{
+  "name": "LMS Mahasiswa & Tutor Online",
+  "description": "Platform LMS Diskusi & Pembelajaran Kolaboratif Mahasiswa dan Tutor Online dengan analisis Taksonomi Bloom AI, validasi penguatan dosen, dan rekapitulasi penilaian.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
