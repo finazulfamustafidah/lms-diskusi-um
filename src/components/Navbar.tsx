@@ -213,39 +213,56 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             </div>
 
-            {/* User Profile Card */}
+            {/* User Profile Card - Matching Image 2 */}
             <div className="flex items-center gap-3 pl-3 border-l-2 border-slate-300">
               {userRole === "mahasiswa" ? (
-                <button
-                  type="button"
-                  id="btn-edit-student-profile-navbar"
-                  onClick={onEditStudentProfile}
-                  title="Klik untuk mengubah Nama & NIM Anda"
-                  className="flex items-center gap-2.5 text-left group p-1 hover:bg-blue-50 border-2 border-transparent hover:border-blue-500 transition-all cursor-pointer"
+                <div
+                  id="student-profile-header-badge"
+                  className="flex items-center gap-2.5 text-left select-none"
                 >
-                  <div className="w-9 h-9 bg-slate-900 group-hover:bg-blue-600 text-white flex items-center justify-center font-black text-xs border-2 border-slate-900 shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] transition-colors">
-                    {currentUser.name.charAt(0)}
+                  {/* Square Avatar Box */}
+                  <div
+                    onClick={onEditStudentProfile}
+                    className="w-10 h-10 bg-slate-950 text-white flex items-center justify-center font-black text-base border-2 border-slate-950 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)] shrink-0 cursor-pointer transition-transform hover:-translate-y-0.5"
+                    title="Klik untuk mengubah profil"
+                  >
+                    {currentUser.name ? currentUser.name.trim().charAt(0).toUpperCase() : "M"}
                   </div>
-                  <div className="text-left hidden sm:block">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-black text-slate-950 leading-tight uppercase group-hover:text-blue-700">
-                        {currentUser.name}
+
+                  {/* Name, Role Badge, and NIM with (Ubah) */}
+                  <div className="text-left leading-tight">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span
+                        onClick={onEditStudentProfile}
+                        className="text-xs sm:text-sm font-black text-slate-950 uppercase tracking-tight hover:text-blue-700 cursor-pointer"
+                        title="Klik untuk ubah nama"
+                      >
+                        {currentUser.name || "NAMA SAYA"}
                       </span>
-                      <span className="text-[10px] px-1.5 py-0.2 font-black uppercase tracking-wider bg-blue-100 text-blue-950 border border-blue-500 flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={onEditStudentProfile}
+                        title="Ubah identitas mahasiswa"
+                        className="px-1.5 py-0.5 text-[10px] sm:text-[11px] font-black uppercase tracking-wider bg-blue-50 text-blue-900 border-2 border-blue-600 hover:bg-blue-100 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                      >
                         <span>MAHASISWA</span>
-                        <Pencil className="w-2.5 h-2.5 text-blue-700" />
-                      </span>
+                        <Pencil className="w-3 h-3 text-blue-600" />
+                      </button>
                     </div>
-                    <div className="flex items-center gap-1.5 text-slate-600 group-hover:text-blue-900">
-                      <span className="text-xs font-mono font-bold block truncate max-w-[180px]">
-                        {currentUser.nim || currentUser.email}
+                    <div className="flex items-center gap-1 text-slate-700 mt-0.5">
+                      <span className="text-xs font-mono font-bold tracking-tight">
+                        {currentUser.nim || "250XXXXXXXXXXX"}
                       </span>
-                      <span className="text-[10px] text-blue-600 font-bold underline decoration-dotted hidden md:inline">
+                      <button
+                        type="button"
+                        onClick={onEditStudentProfile}
+                        className="text-blue-600 hover:text-blue-800 font-bold text-xs underline decoration-dotted ml-0.5 cursor-pointer"
+                      >
                         (Ubah)
-                      </span>
+                      </button>
                     </div>
                   </div>
-                </button>
+                </div>
               ) : (
                 <div className="flex items-center gap-2.5">
                   <div className="w-9 h-9 bg-slate-900 text-white flex items-center justify-center font-black text-xs border-2 border-slate-900 shadow-[2px_2px_0px_0px_rgba(15,23,42,1)]">
