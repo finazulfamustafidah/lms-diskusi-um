@@ -28,7 +28,7 @@ function getAI(): GoogleGenAI | null {
 }
 
 // Cognitive Bloom level helper for fallback
-function fallbackBloomAnalysis(topic: string, text: string, postType: string) {
+function fallbackBloomAnalysis(topic: string, text: string, postType: string, studentName?: string) {
   const lower = text.toLowerCase();
   let level = "Memahami (C2)";
   let code = "C2";
@@ -73,7 +73,8 @@ function fallbackBloomAnalysis(topic: string, text: string, postType: string) {
     lower.includes("aplikasikan") ||
     lower.includes("implementasi") ||
     lower.includes("contoh kasus") ||
-    lower.includes("bagaimana cara mengajar")
+    lower.includes("bagaimana cara mengajar") ||
+    lower.includes("contoh")
   ) {
     level = "Menerapkan (C3)";
     code = "C3";
@@ -96,13 +97,22 @@ function fallbackBloomAnalysis(topic: string, text: string, postType: string) {
     explanation = "Fokus pada mengingat fakta, terminologi, atau istilah dasar.";
   }
 
-  let sampleAnswer = `Halo! Terima kasih telah berkontribusi dalam sesi "${topic}". `;
-  if (postType === "Ajukan Pertanyaan") {
-    sampleAnswer += `Pertanyaan ini sangat relevan untuk memperdalam pemahaman konsep. Dari perspektif pedagogis, ${topic} menekankan proses kognitif aktif di mana pembelajar mengonstruksi pengetahuan secara bermakna. Harap diingat bahwa jawaban ini merupakan panduan pendahuluan dari AI Asisten dan akan ditinjau serta diperkuat langsung oleh Dosen/Tutor Anda.`;
-  } else if (postType === "Refleksi Materi (sudah/belum paham)") {
-    sampleAnswer += `Refleksi yang sangat konstruktif! Kesadaran metakognitif mengenai bagian yang sudah dan belum dipahami merupakan langkah penting dalam penguasaan materi ${topic}. Silakan eksplorasi lebih lanjut bersama rekan kelompok dan nantikan tanggapan penguatan dari Tutor.`;
+  let sampleAnswer = "";
+  if (lower.includes("kognitivisme") || lower.includes("kognitif") && (lower.includes("pakar") || lower.includes("tokoh") || lower.includes("apa itu"))) {
+    sampleAnswer = `Halo ${studentName || "Mahasiswa"}! Teori belajar Kognitivisme menekankan bahwa proses belajar merupakan pengorganisasian kognitif mental aktif (bagaimana informasi diterima, diolah, dan disimpan dalam memori jangka panjang), bukan sekadar respons mekanistik perilaku.
+
+Tokoh-tokoh pakar utama pencetus dan pengembang aliran kognitivisme:
+1. Jean Piaget: Teori perkembangan skema kognitif anak melalui asimilasi, akomodasi, dan ekuilibrasi pada tahap sensori-motorik hingga formal operasional.
+2. Jerome Bruner: Model pembelajaran penemuan (Discovery Learning) serta tahapan representasi pengetahuan (enaktif, ikonik, simbolik) dan scaffolding.
+3. David Ausubel: Teori belajar bermakna (Meaningful Learning) dengan pengait konsep awal (advance organizers).
+4. Robert Gagne: Teori kondisi belajar dan model tahapan pemrosesan informasi (Information Processing Model).
+
+Contoh Penerapan di Kelas:
+Guru tidak hanya meminta siswa mendengarkan ceramah rumus, melainkan mengajak siswa mengamati pola data eksperimen sederhana, mengidentifikasi keteraturan prinsip fisis, dan merumuskan konsep secara mandiri.`;
+  } else if (lower.includes("asimilasi") || lower.includes("akomodasi")) {
+    sampleAnswer = `Halo ${studentName || "Mahasiswa"}! Dalam teori Piaget, asimilasi adalah penggabungan informasi baru ke skema kognitif yang sudah ada tanpa mengubah skema tersebut. Sedangkan akomodasi adalah restrukturisasi atau penyesuaian skema lama menjadi skema baru karena adanya anomali atau miskonsepsi. Saat siswa mengalami miskonsepsi dalam IPA, guru harus menciptakan 'disequilibrium' (konflik kognitif) melalui demonstrasi atau pertanyaan pemandu agar siswa melakukan akomodasi skema mental mereka.`;
   } else {
-    sampleAnswer += `Tanggapan yang sangat baik untuk memperkaya dinamika ruang diskusi kelas. Poin yang Anda sampaikan memberikan sudut pandang menarik mengenai ${topic}. Tutor akan segera memberikan ulasan penguatan dan penilaian.`;
+    sampleAnswer = `Halo ${studentName || "Mahasiswa"}! Pertanyaan yang sangat berbobot pada sesi "${topic}". Terkait pertanyaan Anda: "${text.substring(0, 120)}...", aspek ini merupakan pilar esensial dalam penguasaan teori pembelajaran. Nantikan penguatan dan tinjauan lebih mendalam dari Dosen/Tutor pada evaluasi kelas!`;
   }
 
   return {
@@ -110,7 +120,7 @@ function fallbackBloomAnalysis(topic: string, text: string, postType: string) {
     bloomLevel: level,
     bloomCode: code,
     bloomExplanation: explanation,
-    suggestedReinforcement: `Bagus sekali, pemikiran kritis sudah mulai terbentuk. Penguatan tutor: Pastikan untuk menghubungkan konsep ${topic} dengan prinsip interaksi aktif di kelas modern.`,
+    suggestedReinforcement: `Bagus sekali, stimulus pemikiran kritis mahasiswa pada topik ${topic} sangat baik.`,
   };
 }
 
@@ -129,7 +139,8 @@ app.post("/api/analyze-post", async (req, res) => {
       const fallback = fallbackBloomAnalysis(
         sessionTitle || "Belajar Pembelajaran",
         content,
-        postType || "Ajukan Pertanyaan"
+        postType || "Ajukan Pertanyaan",
+        studentName
       );
       return res.json(fallback);
     }
@@ -193,7 +204,8 @@ Tugas Anda:
     const fallback = fallbackBloomAnalysis(
       req.body.sessionTitle || "Belajar Pembelajaran",
       req.body.content || "",
-      req.body.postType || "Ajukan Pertanyaan"
+      req.body.postType || "Ajukan Pertanyaan",
+      req.body.studentName
     );
     return res.json(fallback);
   }
