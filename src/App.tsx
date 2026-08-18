@@ -590,7 +590,7 @@ export default function App() {
             <span className="font-bold">Universitas Negeri Malang</span>
           </div>
           <p className="text-slate-600 font-medium text-center sm:text-right">
-            Sistem Pembelajaran Kolaboratif Berbasis Taksonomi Bloom & Penguatan Tutor (TEP-402)
+            Belajar Pembelajaran (CC-D3)
           </p>
         </div>
       </footer>
